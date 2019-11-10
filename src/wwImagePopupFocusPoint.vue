@@ -105,7 +105,11 @@ export default {
 
 <style scoped lang="scss">
 .ww-popup-focuspoint {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
     justify-content: center;
     .content {
         width: 100%;
@@ -139,6 +143,7 @@ export default {
                 color: white;
                 top: 50%;
                 left: 50%;
+                -webkit-transform: translate(-50%, -50%);
                 transform: translate(-50%, -50%);
                 cursor: pointer;
                 font-size: 30px;

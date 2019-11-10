@@ -886,8 +886,15 @@ export default {
 <style scoped lang="scss">
 .ww-image {
     position: relative;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
     justify-content: center;
 
     .border {
@@ -908,16 +915,19 @@ export default {
 
         .image {
             position: absolute;
+            -webkit-transition: opacity 0.3s ease;
             transition: opacity 0.3s ease;
             width: 100%;
             height: 100%;
             top: 50%;
             left: 50%;
+            -webkit-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
 
             &.bg {
                 top: auto;
                 left: auto;
+                -webkit-transform: "none";
                 transform: "none";
                 background-repeat: no-repeat;
                 background-position: center;
@@ -943,6 +953,7 @@ export default {
 .ww-edit-mode-content {
     .ww-image:not(.bg) {
         cursor: move;
+        cursor: -webkit-grab;
         cursor: grab;
     }
 
@@ -956,6 +967,7 @@ export default {
         z-index: 5;
         opacity: 0;
         display: block;
+        -webkit-transition: opacity 0.15s ease;
         transition: opacity 0.15s ease;
 
         .zoom-bar {
@@ -971,13 +983,16 @@ export default {
                 background-color: white;
                 width: 3px;
                 border-radius: 50px;
+                -webkit-transform: translateX(-50%);
                 transform: translateX(-50%);
+                -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.5);
                 box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.5);
             }
 
             .zoom-handle {
                 position: absolute;
                 left: 50%;
+                -webkit-transform: translate(-50%, -50%);
                 transform: translate(-50%, -50%);
                 top: 50%;
                 background-color: #e73055;
@@ -985,7 +1000,9 @@ export default {
                 height: 20px;
                 border-radius: 100%;
                 cursor: move;
+                cursor: -webkit-grab;
                 cursor: grab;
+                -webkit-box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5);
                 box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.5);
             }
         }
@@ -1004,9 +1021,11 @@ export default {
         text-align: center;
         cursor: pointer;
         color: #757575;
+        -webkit-box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.5);
         box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.5);
         opacity: 0;
         display: block;
+        -webkit-transition: opacity 0.15s ease;
         transition: opacity 0.15s ease;
     }
 }
@@ -1022,7 +1041,11 @@ export default {
 <style>
 .ww-image-dragging {
     cursor: move;
+    cursor: -webkit-grab;
     cursor: grab;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 </style>
