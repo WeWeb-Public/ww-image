@@ -14,11 +14,11 @@
         </div>
         <div class="format" :style="c_styles.format">
             <!-- Background -->
-            <div v-if="wwAttrs.wwCategory == 'background' && !wwAttrs.wwNoTwicPics" class="image bg twic" :data-background="'url(' + wwObject.content.data.url + ')'" data-background-step="400" :data-background-focus="c_focusPoint" data-background-transform="auto/quality=85" :style="c_styles.image"></div>
+            <div v-if="wwAttrs.wwCategory == 'background' && !wwAttrs.wwNoTwicPics" class="image bg twic" :data-background="'url(' + wwObject.data.url + ')'" data-background-step="400" :data-background-focus="c_focusPoint" data-background-transform="auto/quality=85" :style="c_styles.image"></div>
             <div v-if="wwAttrs.wwCategory == 'background' && wwAttrs.wwNoTwicPics" class="image bg" :style="c_styles.image"></div>
 
             <!-- Image Manager -->
-            <img v-if="wwAttrs.wwCategory != 'background'" draggable="false" class="image" :src="wwObject.content.data.url" :alt="wwObject.content.data.alt" :style="c_styles.image" />
+            <img v-if="wwAttrs.wwCategory != 'background'" draggable="false" class="image" :src="wwObject.data.url" :alt="wwObject.data.alt" :style="c_styles.image" />
         </div>
         <div class="border" :style="c_styles.border"></div>
         <!-- wwManager:end -->
@@ -26,12 +26,12 @@
         <!-- wwFront:start -->
         <div class="format" :style="c_styles.format">
             <!-- Background -->
-            <div v-if="wwAttrs.wwCategory == 'background' && !wwAttrs.wwNoTwicPics" class="image bg twic" :data-background="'url(' + wwObject.content.data.url + ')'" data-background-step="400" :data-background-focus="c_focusPoint" data-background-transform="auto/quality=85" :style="c_styles.image"></div>
+            <div v-if="wwAttrs.wwCategory == 'background' && !wwAttrs.wwNoTwicPics" class="image bg twic" :data-background="'url(' + wwObject.data.url + ')'" data-background-step="400" :data-background-focus="c_focusPoint" data-background-transform="auto/quality=85" :style="c_styles.image"></div>
             <div v-if="wwAttrs.wwCategory == 'background' && wwAttrs.wwNoTwicPics" class="image bg" :style="c_styles.image"></div>
 
             <!-- Image Manager -->
-            <img v-if="wwAttrs.wwCategory != 'background' && !wwAttrs.wwNoTwicPics" class="image twic" :data-src="wwObject.content.data.url" data-src-transform="quality=85/auto" data-src-step="10" :alt="wwObject.content.data.alt" :style="c_styles.image" />
-            <img v-if="wwAttrs.wwCategory != 'background' && wwAttrs.wwNoTwicPics" class="image" :src="wwObject.content.data.url" :alt="wwObject.content.data.alt" :style="c_styles.image" />
+            <img v-if="wwAttrs.wwCategory != 'background' && !wwAttrs.wwNoTwicPics" class="image twic" :data-src="wwObject.data.url" data-src-transform="quality=85/auto" data-src-step="10" :alt="wwObject.data.alt" :style="c_styles.image" />
+            <img v-if="wwAttrs.wwCategory != 'background' && wwAttrs.wwNoTwicPics" class="image" :src="wwObject.data.url" :alt="wwObject.data.alt" :style="c_styles.image" />
         </div>
         <div class="border" :style="c_styles.border"></div>
         <!-- wwFront:end -->
@@ -48,7 +48,6 @@ wwLib.wwPopups.addPopup('wwImagePopupFocusPoint', wwImagePopupFocusPoint);
 export default {
     name: "__COMPONENT_NAME__",
     props: {
-        wwObjectCtrl: Object,
         wwAttrs: {
             type: Object,
             default: {}
@@ -71,9 +70,6 @@ export default {
         };
     },
     computed: {
-        wwObject() {
-            return this.wwObjectCtrl.get();
-        },
         c_styles() {
             if (!this.d_el) {
                 return {}
@@ -108,16 +104,16 @@ export default {
                 }
             }
 
-            this.wwObject.content.data.style = this.wwObject.content.data.style || {}
+            const wwObjectStyle = this.wwObject.style || this.wwObject.data.style || {}
 
             //IMAGE
-            styles.image.filter = this.wwObject.content.data.style.filter || null;
+            styles.image.filter = wwObjectStyle.filter || null;
 
-            styles.image.backgroundImage = this.wwAttrs.wwCategory == 'background' ? 'url(' + this.wwObject.content.data.url + ')' : '';
+            styles.image.backgroundImage = this.wwAttrs.wwCategory == 'background' ? 'url(' + this.wwObject.data.url + ')' : '';
             styles.image.height = this.wwAttrs.wwCategory == 'background' ? '100%' : 'auto';
-            styles.image.width = (this.wwObject.content.data.zoom > 0 ? this.wwObject.content.data.zoom : 1) * 100 + '%';
+            styles.image.width = (this.wwObject.data.zoom > 0 ? this.wwObject.data.zoom : 1) * 100 + '%';
             if (this.wwAttrs.wwCategory != 'background') {
-                let position = this.wwObject.content.data.position || { x: 0, y: 0 }
+                let position = this.wwObject.data.position || { x: 0, y: 0 }
                 styles.image.left = '50%';
                 styles.image.top = '50%';
                 styles.image['-webkit-transform'] = 'translate(' + (position.x - 50) + '%, ' + (position.y - 50) + '%)';
@@ -129,7 +125,7 @@ export default {
 
             //FORMAT
             styles.format.boxShadow = this.getShadow();
-            styles.format.minWidth = this.wwObject.content.data.style.minWidth ? this.wwObject.content.data.style.minWidth + 'px' : '20px';
+            styles.format.minWidth = wwObjectStyle.minWidth ? wwObjectStyle.minWidth + 'px' : '20px';
 
             if (this.wwAttrs.wwCategory != 'background') {
                 styles.format.paddingBottom = this.getRatio() + '%';
@@ -138,40 +134,40 @@ export default {
                 styles.format.paddingBottom = 0;
             }
 
-            if (this.wwObject.content.data.style.maxHeight) {
-                styles.wrapper.maxWidth = (parseInt(this.wwObject.content.data.style.maxHeight) / this.getRatio() * 100) + 'px';
+            if (wwObjectStyle.maxHeight) {
+                styles.wrapper.maxWidth = (parseInt(wwObjectStyle.maxHeight) / this.getRatio() * 100) + 'px';
             } else {
                 styles.wrapper.maxWidth = null;
             }
 
 
             //BORDER
-            const unit = this.wwObject.content.data.style.borderRadiusUnit || '%';
-            const borderRadius = (this.wwObject.content.data.style.borderRadius / (unit == '%' ? 2 : 1) || 0) + unit;
+            const unit = wwObjectStyle.borderRadiusUnit || '%';
+            const borderRadius = (wwObjectStyle.borderRadius / (unit == '%' ? 2 : 1) || 0) + unit;
             styles.border.borderRadius = borderRadius;
             styles.format.borderRadius = borderRadius;
 
-            styles.border.borderWidth = (this.wwObject.content.data.style.borderWidth || 0) + 'px';
+            styles.border.borderWidth = (wwObjectStyle.borderWidth || 0) + 'px';
 
-            styles.border.borderColor = this.wwObject.content.data.style.borderColor || 'black';
-            styles.border.borderStyle = this.wwObject.content.data.style.borderStyle || 'none';
-            styles.border.background = this.wwObject.content.data.style.overlay || '';
+            styles.border.borderColor = wwObjectStyle.borderColor || 'black';
+            styles.border.borderStyle = wwObjectStyle.borderStyle || 'none';
+            styles.border.background = wwObjectStyle.overlay || '';
 
 
 
             return styles;
         },
         c_focusPoint() {
-            let focusPoint = this.wwObject.content.data.focusPoint || [50, 50];
+            let focusPoint = this.wwObject.data.focusPoint || [50, 50];
             return focusPoint[0] + 'px' + focusPoint[1] + 'p';
         },
         c_editing() {
-            return this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT';
+            return this.getWwSectionComponent().getEditMode() == 'CONTENT';
         },
 
         /* wwManager:start */
         c_zoomPercentY() {
-            return 100 - this.d_zoomFactor * Math.sqrt(Math.max(this.wwObject.content.data.zoom, 0) - this.d_zoomMin);
+            return 100 - this.d_zoomFactor * Math.sqrt(Math.max(this.wwObject.data.zoom, 0) - this.d_zoomMin);
         },
         /* wwManager:end */
     },
@@ -219,7 +215,7 @@ export default {
             return this.wwObject.ratio;
         },
         getShadow() {
-            const shadow = this.wwObject.content.data.style.boxShadow || {};
+            const shadow = this.wwObject.data.style.boxShadow || {};
             if (shadow.x || shadow.y || shadow.b || shadow.s || shadow.c) {
                 return shadow.x + 'px ' + shadow.y + 'px ' + shadow.b + 'px ' + shadow.s + 'px ' + shadow.c;
             }
@@ -234,7 +230,7 @@ export default {
             this.preventEvent(event);
 
             //Reset position
-            this.wwObject.content.data.position = { x: 0, y: 0 };
+            this.wwObject.data.position = { x: 0, y: 0 };
 
             //Reset zoom
             const rectImg = this.$el.querySelector('.image').getBoundingClientRect();
@@ -245,17 +241,16 @@ export default {
 
             const ratio = imgSize.h / imgSize.w;
 
-            if (this.wwObject.content.data.zoom !== 1) {
-                this.wwObject.content.data.zoom = 1;
+            if (this.wwObject.data.zoom !== 1) {
+                this.wwObject.data.zoom = 1;
             }
             else {
                 const rectEl = this.$el.getBoundingClientRect();
                 const ratioContainer = rectEl.height / rectEl.width;
 
-                this.wwObject.content.data.zoom = ratioContainer / ratio;
+                this.wwObject.data.zoom = ratioContainer / ratio;
             }
 
-            this.wwObjectCtrl.update(this.wwObject);
 
             return false;
         },
@@ -283,11 +278,10 @@ export default {
             zoomPositionY = Math.min(Math.max(zoomPositionY, 0), 100);
 
 
-            this.wwObject.content.data.zoom = Math.pow((100 - zoomPositionY) / this.d_zoomFactor, 2) + this.d_zoomMin;
+            this.wwObject.data.zoom = Math.pow((100 - zoomPositionY) / this.d_zoomFactor, 2) + this.d_zoomMin;
 
             this.preventEvent(event);
 
-            this.wwObjectCtrl.update(this.wwObject);
 
             return false;
         },
@@ -352,7 +346,7 @@ export default {
         },
         startMove(event) {
 
-            if (this.wwObjectCtrl.getSectionCtrl().getEditMode() != 'CONTENT' || this.wwAttrs.wwCategory == 'background') {
+            if (this.getWwSectionComponent().getEditMode() != 'CONTENT' || this.wwAttrs.wwCategory == 'background') {
                 return;
             }
 
@@ -421,19 +415,19 @@ export default {
             var offsetXpercent = offsetXpx * 100 / rectImg.width;
             var offsetYpercent = offsetYpx * 100 / rectImg.height;
 
-            this.wwObject.content.data.position.x += offsetXpercent;
-            this.wwObject.content.data.position.y += offsetYpercent;// * rectImg.width * rectEl.height / (rectImg.height * rectEl.width);
+            this.wwObject.data.position.x += offsetXpercent;
+            this.wwObject.data.position.y += offsetYpercent;// * rectImg.width * rectEl.height / (rectImg.height * rectEl.width);
 
             if (this.isTouch(event)) {
                 const touchDist = this.getTouchDist(event);
 
-                this.wwObject.content.data.zoom += (touchDist - this.d_lastTouchDist) / 100 * (this.wwObject.content.data.zoom === 0 ? 1 : this.wwObject.content.data.zoom);
+                this.wwObject.data.zoom += (touchDist - this.d_lastTouchDist) / 100 * (this.wwObject.data.zoom === 0 ? 1 : this.wwObject.data.zoom);
 
-                if (this.wwObject.content.data.zoom < this.d_zoomMin) {
-                    this.wwObject.content.data.zoom = this.d_zoomMin;
+                if (this.wwObject.data.zoom < this.d_zoomMin) {
+                    this.wwObject.data.zoom = this.d_zoomMin;
                 }
-                if (this.wwObject.content.data.zoom > 10) {
-                    this.wwObject.content.data.zoom = 10;
+                if (this.wwObject.data.zoom > 10) {
+                    this.wwObject.data.zoom = 10;
                 }
 
                 this.d_lastTouchDist = touchDist;
@@ -443,7 +437,6 @@ export default {
             this.d_lastMovePosition.y = position.y;
 
             this.preventEvent(event);
-            this.wwObjectCtrl.update(this.wwObject);
 
         },
         stopMove(event) {
@@ -468,7 +461,6 @@ export default {
 
             this.d_moveDirection = null;
 
-            this.wwObjectCtrl.update(this.wwObject);
 
 
             window.document.body.classList.remove('ww-image-dragging');
@@ -497,12 +489,11 @@ export default {
 
             try {
                 const result = await wwLib.wwPopups.open(options)
-                this.wwObject.content.data.url = result.image;
+                this.wwObject.data.url = result.image;
 
-                this.wwObject.content.data.zoom = 1;
-                this.wwObject.content.data.position = { x: 0, y: 0 };
+                this.wwObject.data.zoom = 1;
+                this.wwObject.data.position = { x: 0, y: 0 };
 
-                this.wwObjectCtrl.update(this.wwObject);
             } catch (error) {
 
             }
@@ -708,7 +699,7 @@ export default {
                             },
                             type: 'text',
                             key: 'altText',
-                            valueData: 'wwObject.content.data.alt',
+                            valueData: 'wwObject.data.alt',
                             desc: {
                                 en: 'Short description of the image to help blind people and Google for SOE',
                                 fr: 'Déscription courte de l\'image pour aider les personnes mal voyantes et Google (référencement)'
@@ -741,7 +732,7 @@ export default {
                             },
                             type: 'text',
                             key: 'minWidth',
-                            valueData: 'wwObject.content.data.style.minWidth'
+                            valueData: 'wwObject.data.style.minWidth'
                         }
                     ]
                 },
@@ -788,13 +779,13 @@ export default {
                   IMAGE
                 \================================================================================================*/
                 if (typeof (result.image) != 'undefined') {
-                    this.wwObject.content.data.url = result.image;
+                    this.wwObject.data.url = result.image;
                 }
                 if (typeof (result.altText) != 'undefined') {
-                    this.wwObject.content.data.alt = result.altText;
+                    this.wwObject.data.alt = result.altText;
                 }
                 if (typeof (result.focusPoint) != 'undefined') {
-                    this.wwObject.content.data.focusPoint = result.focusPoint;
+                    this.wwObject.data.focusPoint = result.focusPoint;
                 }
 
 
@@ -802,43 +793,41 @@ export default {
                   STYLE
                 \================================================================================================*/
                 if (typeof (result.borderColor) != 'undefined') {
-                    this.wwObject.content.data.style.borderColor = result.borderColor;
+                    this.wwObject.style.borderColor = result.borderColor;
                 }
                 if (typeof (result.borderRadius) != 'undefined') {
-                    this.wwObject.content.data.style.borderRadius = result.borderRadius;
+                    this.wwObject.style.borderRadius = result.borderRadius;
                 }
                 if (typeof (result.borderRadiusUnit) != 'undefined') {
-                    this.wwObject.content.data.style.borderRadiusUnit = result.borderRadiusUnit;
+                    this.wwObject.style.borderRadiusUnit = result.borderRadiusUnit;
                 }
                 if (typeof (result.borderStyle) != 'undefined') {
-                    this.wwObject.content.data.style.borderStyle = result.borderStyle;
+                    this.wwObject.style.borderStyle = result.borderStyle;
                 }
                 if (typeof (result.borderWidth) != 'undefined') {
-                    this.wwObject.content.data.style.borderWidth = result.borderWidth;
+                    this.wwObject.style.borderWidth = result.borderWidth;
                 }
                 if (typeof (result.boxShadow) != 'undefined') {
-                    this.wwObject.content.data.style.boxShadow = result.boxShadow;
+                    this.wwObject.style.boxShadow = result.boxShadow;
                 }
                 if (typeof (result.filter) != 'undefined') {
-                    this.wwObject.content.data.style.filter = result.filter;
+                    this.wwObject.style.filter = result.filter;
                 }
                 if (typeof (result.overlay) != 'undefined') {
-                    this.wwObject.content.data.style.overlay = result.overlay;
+                    this.wwObject.style.overlay = result.overlay;
                 }
                 if (typeof (result.ratio) != 'undefined') {
                     this.wwObject.ratio = result.ratio;
                 }
                 if (typeof (result.maxHeight) != 'undefined') {
-                    this.wwObject.content.data.style.maxHeight = result.maxHeight;
+                    this.wwObject.style.maxHeight = result.maxHeight;
                 }
                 if (typeof (result.minWidth) != 'undefined') {
-                    this.wwObject.content.data.style.minWidth = result.minWidth;
+                    this.wwObject.style.minWidth = result.minWidth;
                 }
 
                 this.$nextTick(() => {
-                    this.wwObjectCtrl.update(this.wwObject);
-
-                    this.wwObjectCtrl.globalEdit(result);
+                    this.globalEdit(result);
                 });
 
             } catch (error) {
@@ -851,12 +840,10 @@ export default {
     },
     created() {
         /* wwManager:start */
-        let u = this.wwObject.content.data.url;
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('wewebapp.s3.eu-west-3.amazonaws.com', 'cdn.weweb.app');
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('wewebapp-preprod.s3.eu-west-3.amazonaws.com', 'cdn.weweb.dev');
-        if (u != this.wwObject.content.data.url) {
-            this.wwObjectCtrl.update(this.wwObject);
-        }
+        this.wwObject.data.style = this.wwObject.data.style || {};
+        let u = this.wwObject.data.url;
+        this.wwObject.data.url = this.wwObject.data.url.replace('wewebapp.s3.eu-west-3.amazonaws.com', 'cdn.weweb.app');
+        this.wwObject.data.url = this.wwObject.data.url.replace('wewebapp-preprod.s3.eu-west-3.amazonaws.com', 'cdn.weweb.dev');
         /* wwManager:end */
     },
     mounted() {
