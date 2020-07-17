@@ -76,6 +76,23 @@
                     "action": "changeImage"
                 }
             ]
-        }
+        },
+        "bindableProps": [
+            {
+                "displayName": {
+                    "en": "Alt text",
+                    "fr": "Texte alt"
+                },
+                "localizable": true,
+                "attributeName": "alt"
+            },
+            {
+                "displayName": {
+                    "en": "Image url",
+                    "fr": "Url de l'image"
+                },
+                "attributeName": "url"
+            }
+        ]
     }
 }
