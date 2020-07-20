@@ -379,6 +379,9 @@ export default {
             }
 
             wwLib.wwObjectHover.removeLock();
+        },
+        async connectCms(){
+            this.wwObjectCtrl.globalEdit({ connect:true });
         }
     }
     /* wwManager:end */
