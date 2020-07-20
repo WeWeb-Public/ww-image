@@ -98,6 +98,7 @@
                     "en": "Image caption",
                     "fr": "Légende de l'image"
                 },
+                "localizable": true,
                 "attributeName": "caption"
             }
         ]
