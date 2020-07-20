@@ -92,6 +92,13 @@
                     "fr": "Url de l'image"
                 },
                 "attributeName": "url"
+            },
+            {
+                "displayName": {
+                    "en": "Image caption",
+                    "fr": "Légende de l'image"
+                },
+                "attributeName": "caption"
             }
         ]
     }
