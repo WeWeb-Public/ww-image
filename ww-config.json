@@ -89,7 +89,7 @@
         "bindableProps": [
             {
                 "displayName": {
-                    "en": "Alt text",
+                    "en": "Alt tag",
                     "fr": "Texte alt"
                 },
                 "localizable": true,
@@ -97,8 +97,8 @@
             },
             {
                 "displayName": {
-                    "en": "Image url",
-                    "fr": "Url de l'image"
+                    "en": "Source (url)",
+                    "fr": "Source (url)"
                 },
                 "attributeName": "url"
             },
@@ -109,6 +109,14 @@
                 },
                 "localizable": true,
                 "attributeName": "caption"
+            },
+            {
+                "displayName": {
+                    "en": "Link",
+                    "fr": "Lien"
+                },
+                "localizable": true,
+                "attributeName": "link"
             }
         ]
     }
