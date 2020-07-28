@@ -54,6 +54,10 @@
         }
     },
     "cmsOptions": {
+        "displayName": {
+            "en": "Image",
+            "fr": "Image"
+        },
         "wwObjectMenu": {
             "items": [
                 {
