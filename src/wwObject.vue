@@ -381,7 +381,7 @@ export default {
             wwLib.wwObjectHover.removeLock();
         },
         async connectCms(){
-            this.wwObjectCtrl.globalEdit({ connect:true });
+            this.wwObjectCtrl.editCmsBindings();
         }
     }
     /* wwManager:end */

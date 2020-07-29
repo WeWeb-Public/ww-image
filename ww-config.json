@@ -98,14 +98,14 @@
             {
                 "displayName": {
                     "en": "Image url",
-                    "fr": "Url de l\\'image"
+                    "fr": "Url de l'image"
                 },
                 "attributeName": "url"
             },
             {
                 "displayName": {
                     "en": "Image caption",
-                    "fr": "Légende de l\\'image"
+                    "fr": "Légende de l'image"
                 },
                 "localizable": true,
                 "attributeName": "caption"
