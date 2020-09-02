@@ -1,6 +1,7 @@
 <template>
     <Hydrate ssr-only class="ww-image">
-        <wwObjectImage class="ww-image" :ww-object-ctrl="wwObjectCtrl" :ww-attrs="wwAttrs" :is-selected="isSelected"></wwObjectImage>
+        <!-- TODO: Only extract needed props, and inheritAttr false to push everything here -->
+        <wwObjectImage class="ww-image" :id="id" :ww-attrs="wwAttrs" :is-selected="isSelected" :is-3d="is3d" :data="data" @update="$emit('update', $event)"></wwObjectImage>
     </Hydrate>
 </template>
 
@@ -15,19 +16,18 @@ export default {
         wwObjectImage
     },
     props: {
-        wwObjectCtrl: Object,
+        id: Number,
         wwAttrs: {
             type: Object,
             default: {}
         },
-        isSelected: { type: Boolean, default: false },
+        data: Object,
+        /* wwManager: start */
+        isSelected: Boolean,
+        is3d: Boolean,
+        /* wwManager: end */
     },
     /* wwManager:start */
-    computed: {
-        wwObject() {
-            return this.wwObjectCtrl.get();
-        }
-    },
     methods: {
         async changeImage() {
             wwLib.wwManagerUI.lockSelection();
@@ -46,12 +46,9 @@ export default {
 
             try {
                 const result = await wwLib.wwPopups.open(options);
-                this.wwObject.content.data.url = result.image.replace('.dev', '.space');
+                const url = result.image.replace('.dev', '.space');
 
-                this.wwObject.content.data.zoom = 1;
-                this.wwObject.content.data.position = { x: 0, y: 0 };
-
-                this.wwObjectCtrl.update(this.wwObject);
+                this.$emit('update', {url, zoom: 1, position: {x: 0, y: 0}})
             } catch (error) {}
 
             wwLib.wwManagerUI.unlockSelection();
@@ -323,55 +320,66 @@ export default {
                 /*=============================================m_ÔÔ_m=============================================\
                   IMAGE
                 \================================================================================================*/
+                let update = {}
                 if (typeof result.image != 'undefined') {
-                    this.wwObject.content.data.url = result.image;
+                    update.url = result.image;
                 }
                 if (typeof result.altText != 'undefined') {
-                    this.wwObject.content.data.alt = result.altText;
+                    update.alt = result.altText;
                 }
                 if (typeof result.focusPoint != 'undefined') {
-                    this.wwObject.content.data.focusPoint = result.focusPoint;
+                    update.focusPoint = result.focusPoint;
                 }
 
                 /*=============================================m_ÔÔ_m=============================================\
                   STYLE
                 \================================================================================================*/
                 if (typeof result.borderColor != 'undefined') {
-                    this.wwObject.content.data.style.borderColor = result.borderColor;
+                    update.style = update.style || {}
+                    update.style.borderColor = result.borderColor;
                 }
                 if (typeof result.borderRadius != 'undefined') {
-                    this.wwObject.content.data.style.borderRadius = result.borderRadius;
+                    update.style = update.style || {}
+                    update.style.borderRadius = result.borderRadius;
                 }
                 if (typeof result.borderRadiusUnit != 'undefined') {
-                    this.wwObject.content.data.style.borderRadiusUnit = result.borderRadiusUnit;
+                    update.style = update.style || {}
+                    update.style.borderRadiusUnit = result.borderRadiusUnit;
                 }
                 if (typeof result.borderStyle != 'undefined') {
-                    this.wwObject.content.data.style.borderStyle = result.borderStyle;
+                    update.style = update.style || {}
+                    update.style.borderStyle = result.borderStyle;
                 }
                 if (typeof result.borderWidth != 'undefined') {
-                    this.wwObject.content.data.style.borderWidth = result.borderWidth;
+                    update.style = update.style || {}
+                    update.style.borderWidth = result.borderWidth;
                 }
                 if (typeof result.boxShadow != 'undefined') {
-                    this.wwObject.content.data.style.boxShadow = result.boxShadow;
+                    update.style = update.style || {}
+                    update.style.boxShadow = result.boxShadow;
                 }
                 if (typeof result.filter != 'undefined') {
-                    this.wwObject.content.data.style.filter = result.filter;
+                    update.style = update.style || {}
+                    update.style.filter = result.filter;
                 }
                 if (typeof result.overlay != 'undefined') {
-                    this.wwObject.content.data.style.overlay = result.overlay;
+                    update.style = update.style || {}
+                    update.style.overlay = result.overlay;
                 }
-                if (typeof result.ratio != 'undefined') {
-                    this.wwObject.ratio = result.ratio;
-                }
+                // if (typeof result.ratio != 'undefined') {
+                //     this.wwObject.ratio = result.ratio;
+                // }
                 if (typeof result.maxHeight != 'undefined') {
-                    this.wwObject.content.data.style.maxHeight = result.maxHeight;
+                    update.style = update.style || {}
+                    update.style.maxHeight = result.maxHeight;
                 }
                 if (typeof result.minWidth != 'undefined') {
-                    this.wwObject.content.data.style.minWidth = result.minWidth;
+                    update.style = update.style || {}
+                    update.style.minWidth = result.minWidth;
                 }
 
                 this.$nextTick(() => {
-                    this.wwObjectCtrl.update(this.wwObject);
+                    this.$emit('update', update)
 
                     this.wwObjectCtrl.globalEdit(result);
                 });

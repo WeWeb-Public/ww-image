@@ -1,5 +1,6 @@
 <template>
     <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper">
+        <!-- Test: {{data.position}} -->
         <!-- wwManager:start -->
         <div class="controls-desktop" v-if="isControlsDisplayed">
             <div class="zoom-bar">
@@ -17,7 +18,7 @@
             <div v-if="wwAttrs.wwCategory == 'background'" class="image bg" :style="c_styles.image"></div>
 
             <!-- Normal Image -->
-            <img v-if="wwAttrs.wwCategory != 'background'" draggable="false" class="image" :src="wwObject.content.data.url" :alt="wwObject.content.data.alt" :style="c_styles.image" />
+            <img v-if="wwAttrs.wwCategory != 'background'" draggable="false" class="image" :src="data.url" :alt="data.alt" :style="c_styles.image" />
         </div>
         <!-- wwManager:end -->
 
@@ -32,7 +33,7 @@
                 <div
                     v-else-if="!c_imgSrcSet"
                     class="image bg twic"
-                    :data-background="'url(' + wwObject.content.data.url + ')'"
+                    :data-background="'url(' + data.url + ')'"
                     data-background-step="400"
                     :data-background-focus="c_focusPoint"
                     data-background-transform="auto/quality=85"
@@ -46,18 +47,18 @@
             <!-- Normal Image -->
             <template v-else>
                 <!-- No Twicpics -->
-                <img v-if="wwAttrs.wwNoTwicPics" class="image" :src="wwObject.content.data.url" :alt="wwObject.content.data.alt" :style="c_styles.image" :loading="d_isLazy ? 'lazy' : 'auto'" />
+                <img v-if="wwAttrs.wwNoTwicPics" class="image" :src="data.url" :alt="data.alt" :style="c_styles.image" :loading="d_isLazy ? 'lazy' : 'auto'" />
 
                 <!-- Twicpics -->
-                <img v-else-if="!c_imgSrcSet" class="image twic" :src="d_preview" :data-src="wwObject.content.data.url" data-src-transform="quality=85/auto" data-src-step="10" :alt="wwObject.content.data.alt" :style="c_styles.image" />
+                <img v-else-if="!c_imgSrcSet" class="image twic" :src="d_preview" :data-src="data.url" data-src-transform="quality=85/auto" data-src-step="10" :alt="data.alt" :style="c_styles.image" />
 
                 <!-- SRCSET -->
                 <img
                     class="image"
                     :style="c_styles.image"
                     :srcset="c_imgSrcSet"
-                    :src="`https://weweb.twic.pics/${wwObject.content.data.url}${wwObject.content.data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/resize=1024`"
-                    :alt="wwObject.content.data.alt"
+                    :src="`https://weweb.twic.pics/${data.url}${data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/resize=1024`"
+                    :alt="data.alt"
                     loading="lazy"
                 />
             </template>
@@ -77,13 +78,15 @@ wwLib.wwPopups.addPopup('wwImagePopupFocusPoint', wwImagePopupFocusPoint);
 export default {
     name: '__COMPONENT_NAME__',
     props: {
-        wwObjectCtrl: Object,
+        id: Number,
+        data: Object,
         wwAttrs: {
             type: Object,
             default: {}
         },
         /* wwManager: start */
         isSelected: Boolean,
+        is3d: Boolean,
         /* wwManager: end */
     },
     data() {
@@ -110,9 +113,6 @@ export default {
         };
     },
     computed: {
-        wwObject() {
-            return this.wwObjectCtrl.get();
-        },
         c_styles() {
             if (!this.d_el) {
                 return {};
@@ -147,22 +147,22 @@ export default {
                 }
             };
 
-            this.wwObject.content.data.style = this.wwObject.content.data.style || {};
+            const styleData = this.data.style || {};
 
             //IMAGE
-            styles.image.filter = this.wwObject.content.data.style.filter || null;
+            styles.image.filter = styleData.filter || null;
 
             if (this.wwAttrs.wwCategory == 'background' && !this.c_imgSrcSet) {
-                styles.image.backgroundImage = `url(${this.wwAttrs.wwNoTwicPics ? this.wwObject.content.data.url : this.d_preview})`;
+                styles.image.backgroundImage = `url(${this.wwAttrs.wwNoTwicPics ? styleData.url : this.d_preview})`;
             }
 
             /* wwManager:start */
-            this.wwAttrs.wwCategory == 'background' && (styles.image.backgroundImage = 'url(' + this.wwObject.content.data.url + ')');
+            this.wwAttrs.wwCategory == 'background' && (styles.image.backgroundImage = 'url(' + styleData.url + ')');
             /* wwManager:end */
             styles.image.height = this.wwAttrs.wwCategory == 'background' ? '100%' : 'auto';
-            styles.image.width = (this.wwObject.content.data.zoom > 0 ? this.wwObject.content.data.zoom : 1) * 100 + '%';
+            styles.image.width = (styleData.zoom > 0 ? styleData.zoom : 1) * 100 + '%';
             if (this.wwAttrs.wwCategory != 'background') {
-                let position = this.wwObject.content.data.position || { x: 0, y: 0 };
+                let position = this.data.position || { x: 0, y: 0 };
                 styles.image.left = '50%';
                 styles.image.top = '50%';
                 styles.image['-webkit-transform'] = 'translate(' + (position.x - 50) + '%, ' + (position.y - 50) + '%)';
@@ -174,7 +174,7 @@ export default {
 
             //FORMAT
             styles.format.boxShadow = this.getShadow();
-            styles.format.minWidth = this.wwObject.content.data.style.minWidth ? this.wwObject.content.data.style.minWidth + 'px' : '20px';
+            styles.format.minWidth = styleData.minWidth ? styleData.minWidth + 'px' : '20px';
 
             if (this.wwAttrs.wwCategory != 'background') {
                 styles.format.paddingBottom = this.getRatio() + '%';
@@ -182,36 +182,36 @@ export default {
                 styles.format.paddingBottom = 0;
             }
 
-            if (this.wwObject.content.data.style.maxHeight) {
-                styles.wrapper.maxWidth = (parseInt(this.wwObject.content.data.style.maxHeight) / this.getRatio()) * 100 + 'px';
+            if (styleData.maxHeight) {
+                styles.wrapper.maxWidth = (parseInt(styleData.maxHeight) / this.getRatio()) * 100 + 'px';
             } else {
                 styles.wrapper.maxWidth = null;
             }
 
             //BORDER
-            const unit = this.wwObject.content.data.style.borderRadiusUnit || '%';
-            const borderRadius = (this.wwObject.content.data.style.borderRadius / (unit == '%' ? 2 : 1) || 0) + unit;
+            const unit = styleData.borderRadiusUnit || '%';
+            const borderRadius = (styleData.borderRadius / (unit == '%' ? 2 : 1) || 0) + unit;
             styles.border.borderRadius = borderRadius;
             styles.format.borderRadius = borderRadius;
 
-            styles.border.borderWidth = (this.wwObject.content.data.style.borderWidth || 0) + 'px';
+            styles.border.borderWidth = (styleData.borderWidth || 0) + 'px';
 
-            styles.border.borderColor = this.wwObject.content.data.style.borderColor || 'black';
-            styles.border.borderStyle = this.wwObject.content.data.style.borderStyle || 'none';
-            styles.border.background = this.wwObject.content.data.style.overlay || '';
+            styles.border.borderColor = styleData.borderColor || 'black';
+            styles.border.borderStyle = styleData.borderStyle || 'none';
+            styles.border.background = styleData.overlay || '';
 
             return styles;
         },
         c_focusPoint() {
-            let focusPoint = this.wwObject.content.data.focusPoint || [50, 50];
+            let focusPoint = this.data.focusPoint || [50, 50];
             return focusPoint[0] + 'px' + focusPoint[1] + 'p';
         },
         c_editing() {
-            return this.wwObjectCtrl.getSectionCtrl().getEditMode() == 'CONTENT';
+            return this.isSelected && !this.is3d;
         },
         c_imgSrcSet() {
             /* wwFront:start */
-            if (this.wwObject.content.data.url.indexOf('.gif') !== -1) {
+            if (this.data.url.indexOf('.gif') !== -1) {
                 return null;
             }
 
@@ -238,7 +238,7 @@ export default {
                 for (const screen in screenBreakpoints) {
                     if (this.d_imageSizes[screen]) {
                         sources.push(
-                            `https://weweb.twic.pics/${this.wwObject.content.data.url}${this.wwObject.content.data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/resize=${this.d_imageSizes[screen][0]} ${screenBreakpoints[screen]}w`
+                            `https://weweb.twic.pics/${this.data.url}${this.data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/resize=${this.d_imageSizes[screen][0]} ${screenBreakpoints[screen]}w`
                         );
                     }
                 }
@@ -253,7 +253,7 @@ export default {
                             return null;
                         }
                         sources[screen] = {
-                            backgroundImage: `url(https://weweb.twic.pics/${this.wwObject.content.data.url}${this.wwObject.content.data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/focus=${this.c_focusPoint}/cover=${
+                            backgroundImage: `url(https://weweb.twic.pics/${this.data.url}${this.data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/focus=${this.c_focusPoint}/cover=${
                                 this.d_imageSizes[screen][0]
                             }x${this.d_imageSizes[screen][1]}/resize=${this.d_imageSizes[screen][0]})`
                         };
@@ -270,7 +270,7 @@ export default {
 
         /* wwManager:start */
         c_zoomPercentY() {
-            return 100 - this.d_zoomFactor * Math.sqrt(Math.max(this.wwObject.content.data.zoom, 0) - this.d_zoomMin);
+            return 100 - this.d_zoomFactor * Math.sqrt(Math.max(this.data.zoom, 0) - this.d_zoomMin);
         },
         isControlsDisplayed() {
             return this.isSelected && this.wwAttrs.wwCategory !== 'background'
@@ -299,7 +299,7 @@ export default {
                     imgSizeElm.setAttribute('id', `ww-image-size`);
                     document.head.append(imgSizeElm);
                 }
-                imgSizeElm.innerText += `window.wwg_imageSize_${this.c_screenSize}_${this.wwObject.uniqueId} = ${JSON.stringify(this.d_imageSizes[this.c_screenSize])};`;
+                imgSizeElm.innerText += `window.wwg_imageSize_${this.c_screenSize}_${this.id} = ${JSON.stringify(this.d_imageSizes[this.c_screenSize])};`;
             }
         }
         /* wwFront:end */
@@ -307,11 +307,6 @@ export default {
     methods: {
         init() {
             this.d_zoomFactor = Math.sqrt((100 * 100) / (10 - this.d_zoomMin));
-
-            // const section = this.$el.closest('.ww-section');
-            // if (section && section.getAttribute('section-index') && section.getAttribute('section-index') < 2) {
-            //     this.d_preview = `https://i.twic.pics/${this.wwObject.content.data.url}${this.wwObject.content.data.url.indexOf('?') === -1 ? '?' : '&'}twic=v1/resize=50`;
-            // }
         },
         preventEvent(event) {
             if (!this.isTouch(event)) {
@@ -338,18 +333,19 @@ export default {
                 }
             }
 
-            if (!this.wwObject.ratio || this.wwObject.ratio < 0) {
+            // if (!this.wwObject.ratio || this.wwObject.ratio < 0) {
                 if (this.wwAttrs.wwDefaultRatio) {
                     return this.wwAttrs.wwDefaultRatio;
                 } else {
                     return (100 / 3) * 2;
                 }
-            }
+            // }
 
-            return this.wwObject.ratio;
+            // return this.wwObject.ratio;
         },
         getShadow() {
-            const shadow = this.wwObject.content.data.style.boxShadow || {};
+            const styleData = this.data.style ||{}
+            const shadow = styleData.boxShadow || {};
             if (shadow.x || shadow.y || shadow.b || shadow.s || shadow.c) {
                 return shadow.x + 'px ' + shadow.y + 'px ' + shadow.b + 'px ' + shadow.s + 'px ' + shadow.c;
             }
@@ -363,9 +359,6 @@ export default {
         resetZoom(event) {
             this.preventEvent(event);
 
-            //Reset position
-            this.wwObject.content.data.position = { x: 0, y: 0 };
-
             //Reset zoom
             const rectImg = this.$el.querySelector('.image').getBoundingClientRect();
             const imgSize = {
@@ -374,17 +367,18 @@ export default {
             };
 
             const ratio = imgSize.h / imgSize.w;
+            let zoom;
 
-            if (this.wwObject.content.data.zoom !== 1) {
-                this.wwObject.content.data.zoom = 1;
+            if (this.data.zoom !== 1) {
+                zoom = 1;
             } else {
                 const rectEl = this.$el.getBoundingClientRect();
                 const ratioContainer = rectEl.height / rectEl.width;
 
-                this.wwObject.content.data.zoom = ratioContainer / ratio;
+                zoom = ratioContainer / ratio;
             }
 
-            this.wwObjectCtrl.update(this.wwObject);
+            this.$emit('update', {zoom, position: { x: 0, y: 0 }})
 
             return false;
         },
@@ -407,11 +401,11 @@ export default {
             let zoomPositionY = ((event.clientY - this.d_zoomBarElement.getBoundingClientRect().top) * 100) / this.d_zoomBarElement.getBoundingClientRect().height;
             zoomPositionY = Math.min(Math.max(zoomPositionY, 0), 100);
 
-            this.wwObject.content.data.zoom = Math.pow((100 - zoomPositionY) / this.d_zoomFactor, 2) + this.d_zoomMin;
+            const zoom = Math.pow((100 - zoomPositionY) / this.d_zoomFactor, 2) + this.d_zoomMin;
 
             this.preventEvent(event);
 
-            this.wwObjectCtrl.update(this.wwObject);
+            this.$emit('update', {zoom})
 
             return false;
         },
@@ -471,8 +465,7 @@ export default {
             return event.touches && event.touches.length;
         },
         startMove(event) {
-            if (!this.isSelected) return
-            if (this.wwObjectCtrl.getSectionCtrl().getEditMode() != 'CONTENT' || this.wwAttrs.wwCategory == 'background') {
+            if (!this.isSelected || this.is3d || this.wwAttrs.wwCategory == 'background') {
                 return;
             }
 
@@ -532,19 +525,24 @@ export default {
             var offsetXpercent = (offsetXpx * 100) / rectImg.width;
             var offsetYpercent = (offsetYpx * 100) / rectImg.height;
 
-            this.wwObject.content.data.position.x += offsetXpercent;
-            this.wwObject.content.data.position.y += offsetYpercent; // * rectImg.width * rectEl.height / (rectImg.height * rectEl.width);
+            const currentPosition = this.data.position
+            const newPosition = {
+                x: currentPosition.x + offsetXpercent,
+                y: currentPosition.y + offsetYpercent
+            }
+
+            let newZoom;
 
             if (this.isTouch(event)) {
                 const touchDist = this.getTouchDist(event);
 
-                this.wwObject.content.data.zoom += ((touchDist - this.d_lastTouchDist) / 100) * (this.wwObject.content.data.zoom === 0 ? 1 : this.wwObject.content.data.zoom);
+                newZoom = this.data.zoom + ((touchDist - this.d_lastTouchDist) / 100) * (this.data.zoom === 0 ? 1 : this.data.zoom);
 
-                if (this.wwObject.content.data.zoom < this.d_zoomMin) {
-                    this.wwObject.content.data.zoom = this.d_zoomMin;
+                if (newZoom < this.d_zoomMin) {
+                    newZoom = this.d_zoomMin;
                 }
-                if (this.wwObject.content.data.zoom > 10) {
-                    this.wwObject.content.data.zoom = 10;
+                if (newZoom > 10) {
+                    newZoom = 10;
                 }
 
                 this.d_lastTouchDist = touchDist;
@@ -554,7 +552,9 @@ export default {
             this.d_lastMovePosition.y = position.y;
 
             this.preventEvent(event);
-            this.wwObjectCtrl.update(this.wwObject);
+            const update = { position: newPosition }
+            if (newZoom) { update.zoom = newZoom }
+            this.$emit('update', update);
         },
         stopMove(event) {
             this.d_moving = false;
@@ -570,7 +570,6 @@ export default {
             wwLib.getManagerDocument().removeEventListener('touchend', this.stopMove);
 
             this.d_moveDirection = null;
-            this.wwObjectCtrl.update(this.wwObject);
             window.document.body.classList.remove('ww-image-dragging');
 
             wwLib.wwManagerUI.unlockSelection();
@@ -581,34 +580,35 @@ export default {
     },
     created() {
         /* wwManager:start */
-        let u = this.wwObject.content.data.url;
+        let formattedUrl = this.data.url;
 
         //Replace for prod
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('weweb.twic.pics', 'cdn.weweb.app');
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('wewebapp.s3.eu-west-3.amazonaws.com', 'cdn.weweb.app');
+        formattedUrl = formattedUrl.replace('weweb.twic.pics', 'cdn.weweb.app');
+        formattedUrl = formattedUrl.replace('wewebapp.s3.eu-west-3.amazonaws.com', 'cdn.weweb.app');
 
         //Replace for preprod
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('weweb.twic.pics/preprod', 'cdn.weweb.dev');
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('wewebapp-preprod.s3.eu-west-3.amazonaws.com', 'cdn.weweb.dev');
+        formattedUrl = formattedUrl.replace('weweb.twic.pics/preprod', 'cdn.weweb.dev');
+        formattedUrl = formattedUrl.replace('wewebapp-preprod.s3.eu-west-3.amazonaws.com', 'cdn.weweb.dev');
 
         //Replace for staging
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('weweb.twic.pics/staging', 'cdn.weweb.space');
-        this.wwObject.content.data.url = this.wwObject.content.data.url.replace('wewebapp-dev.s3.eu-west-3.amazonaws.com', 'cdn.weweb.space');
+        formattedUrl = formattedUrl.replace('weweb.twic.pics/staging', 'cdn.weweb.space');
+        formattedUrl = formattedUrl.replace('wewebapp-dev.s3.eu-west-3.amazonaws.com', 'cdn.weweb.space');
 
-        if (u != this.wwObject.content.data.url) {
-            this.wwObjectCtrl.update(this.wwObject);
+        if (formattedUrl != this.data.url) {
+            this.$emit('update', {url: formattedUrl})
         }
         /* wwManager:end */
 
         /* wwFront:start */
         const screens = ['lg', 'md', 'sm', 'xs'];
         for (const screen of screens) {
-            if (window[`wwg_imageSize_${screen}_${this.wwObject.uniqueId}`]) {
-                this.d_imageSizes[screen] = window[`wwg_imageSize_${screen}_${this.wwObject.uniqueId}`];
+            if (window[`wwg_imageSize_${screen}_${this.id}`]) {
+                this.d_imageSizes[screen] = window[`wwg_imageSize_${screen}_${this.id}`];
                 this.d_imageSizes[screen][0] = this.d_imageSizes[screen][0] || 1024;
             }
         }
         /* wwFront:end */
+        console.log(this.id, this.data)
     },
     mounted() {
         this.init();
