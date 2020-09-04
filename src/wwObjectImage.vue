@@ -1,7 +1,7 @@
 <template>
     <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper">
         <!-- wwManager:start -->
-        <div class="controls-desktop" :class="{ lock: d_lockControls }">
+        <div class="controls-desktop" v-if="isControlsDisplayed">
             <div class="zoom-bar">
                 <div class="zoom-line"></div>
                 <div class="zoom-handle" :style="{ top: c_zoomPercentY + '%' }" @mousedown="startZoomDesktop($event)">
@@ -9,7 +9,7 @@
                 </div>
             </div>
         </div>
-        <div class="reset-zoom" @click="resetZoom($event)">
+        <div class="reset-zoom" @mousedown="resetZoom($event)" v-if="isControlsDisplayed">
             <i class="fa fa-expand" aria-hidden="true"></i>
         </div>
         <div class="format" :style="c_styles.format">
@@ -81,7 +81,10 @@ export default {
         wwAttrs: {
             type: Object,
             default: {}
-        }
+        },
+        /* wwManager: start */
+        isSelected: Boolean,
+        /* wwManager: end */
     },
     data() {
         return {
@@ -101,7 +104,6 @@ export default {
             d_moving: false,
             d_lastTouchDist: 0,
             d_zoomBarElement: null,
-            d_lockControls: false,
             d_moveDirection: null,
             d_imgSize: {}
             /* wwManager:end */
@@ -269,6 +271,9 @@ export default {
         /* wwManager:start */
         c_zoomPercentY() {
             return 100 - this.d_zoomFactor * Math.sqrt(Math.max(this.wwObject.content.data.zoom, 0) - this.d_zoomMin);
+        },
+        isControlsDisplayed() {
+            return this.isSelected && this.wwAttrs.wwCategory !== 'background'
         }
         /* wwManager:end */
     },
@@ -387,9 +392,7 @@ export default {
             event.preventDefault();
             event.stopPropagation();
 
-            this.d_lockControls = true;
-
-            wwLib.wwObjectHover.setLock(this);
+            wwLib.wwManagerUI.lockSelection();
 
             this.d_zoomBarElement = this.$el.querySelector('.zoom-bar');
 
@@ -397,8 +400,6 @@ export default {
             window.addEventListener('mouseup', this.stopZoomDesktop);
 
             window.document.body.classList.add('ww-image-dragging');
-
-            wwLib.wwObjectMenu.preventOpen();
 
             return false;
         },
@@ -415,9 +416,7 @@ export default {
             return false;
         },
         stopZoomDesktop(event) {
-            this.d_lockControls = false;
-
-            wwLib.wwObjectHover.removeLock();
+            wwLib.wwManagerUI.unlockSelection();
 
             window.removeEventListener('mousemove', this.zoomDesktop);
             window.removeEventListener('mouseup', this.stopZoomDesktop);
@@ -472,6 +471,7 @@ export default {
             return event.touches && event.touches.length;
         },
         startMove(event) {
+            if (!this.isSelected) return
             if (this.wwObjectCtrl.getSectionCtrl().getEditMode() != 'CONTENT' || this.wwAttrs.wwCategory == 'background') {
                 return;
             }
@@ -481,13 +481,14 @@ export default {
             }
 
             this.d_moving = false;
+            wwLib.wwManagerUI.lockSelection();
 
             this.d_lastMovePosition = this.getEventPosition(event);
             if (this.d_lastMovePosition) {
                 wwLib.getFrontDocument().addEventListener('mousemove', this.move);
                 wwLib.getManagerDocument().addEventListener('mousemove', this.move);
-                wwLib.getFrontDocument().addEventListener('mouseup', this.stopMove);
-                wwLib.getManagerDocument().addEventListener('mouseup', this.stopMove);
+                wwLib.getFrontDocument().addEventListener('click', this.stopMove);
+                wwLib.getManagerDocument().addEventListener('click', this.stopMove);
 
                 wwLib.getFrontDocument().addEventListener('touchmove', this.move);
                 wwLib.getManagerDocument().addEventListener('touchmove', this.move);
@@ -499,11 +500,6 @@ export default {
             }
         },
         move(event) {
-            if (wwLib.wwObjectMenu.list.length) {
-                this.stopMove(event);
-                return;
-            }
-
             let position = this.getEventPosition(event);
 
             if (!position) {
@@ -561,18 +557,12 @@ export default {
             this.wwObjectCtrl.update(this.wwObject);
         },
         stopMove(event) {
-            if (this.d_moving) {
-                wwLib.wwObjectMenu.preventOpen();
-            }
-
-            this.d_lockControls = false;
-
             this.d_moving = false;
 
             wwLib.getFrontDocument().removeEventListener('mousemove', this.move);
             wwLib.getManagerDocument().removeEventListener('mousemove', this.move);
-            wwLib.getFrontDocument().removeEventListener('mouseup', this.stopMove);
-            wwLib.getManagerDocument().removeEventListener('mouseup', this.stopMove);
+            wwLib.getFrontDocument().removeEventListener('click', this.stopMove);
+            wwLib.getManagerDocument().removeEventListener('click', this.stopMove);
 
             wwLib.getFrontDocument().removeEventListener('touchmove', this.move);
             wwLib.getManagerDocument().removeEventListener('touchmove', this.move);
@@ -580,10 +570,10 @@ export default {
             wwLib.getManagerDocument().removeEventListener('touchend', this.stopMove);
 
             this.d_moveDirection = null;
-
             this.wwObjectCtrl.update(this.wwObject);
-
             window.document.body.classList.remove('ww-image-dragging');
+
+            wwLib.wwManagerUI.unlockSelection();
 
             return false;
         }
@@ -703,13 +693,6 @@ export default {
 }
 
 /* wwManager:start */
-.controls-desktop {
-    display: none;
-}
-
-.reset-zoom {
-    display: none;
-}
 
 .ww-edit-mode-content {
     .ww-image:not(.bg) {
@@ -725,7 +708,6 @@ export default {
         top: 5px;
         width: 20px;
         z-index: 5;
-        opacity: 0;
         display: block;
         transition: opacity 0.15s ease;
 
@@ -776,16 +758,9 @@ export default {
         cursor: pointer;
         color: #757575;
         box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.5);
-        opacity: 0;
         display: block;
         transition: opacity 0.15s ease;
     }
-}
-
-.ww-image:not(.bg):hover .controls-desktop,
-.ww-image:not(.bg):hover .reset-zoom,
-.controls-desktop.lock {
-    opacity: 1;
 }
 /* wwManager:end */
 </style>

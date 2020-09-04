@@ -1,6 +1,6 @@
 <template>
     <Hydrate ssr-only class="ww-image">
-        <wwObjectImage class="ww-image" :ww-object-ctrl="wwObjectCtrl" :ww-attrs="wwAttrs"></wwObjectImage>
+        <wwObjectImage class="ww-image" :ww-object-ctrl="wwObjectCtrl" :ww-attrs="wwAttrs" :is-selected="isSelected"></wwObjectImage>
     </Hydrate>
 </template>
 
@@ -19,7 +19,8 @@ export default {
         wwAttrs: {
             type: Object,
             default: {}
-        }
+        },
+        isSelected: { type: Boolean, default: false },
     },
     /* wwManager:start */
     computed: {
@@ -29,7 +30,7 @@ export default {
     },
     methods: {
         async changeImage() {
-            wwLib.wwObjectHover.setLock(this);
+            wwLib.wwManagerUI.lockSelection();
 
             wwLib.wwPopups.addStory('WWIMAGE_SELECT', {
                 title: {
@@ -53,10 +54,10 @@ export default {
                 this.wwObjectCtrl.update(this.wwObject);
             } catch (error) {}
 
-            wwLib.wwObjectHover.removeLock();
+            wwLib.wwManagerUI.unlockSelection();
         },
         async edit() {
-            wwLib.wwObjectHover.setLock(this);
+           wwLib.wwManagerUI.lockSelection();
 
             let editOptionsList = {
                 EDIT_IMAGE_SELECT: {
@@ -378,10 +379,11 @@ export default {
                 console.log(error);
             }
 
-            wwLib.wwObjectHover.removeLock();
+            wwLib.wwManagerUI.unlockSelection();
         },
         async connectCms(){
             this.wwObjectCtrl.editCmsBindings();
+            wwLib.wwManagerUI.unlockSelection();
         }
     }
     /* wwManager:end */
