@@ -1,5 +1,6 @@
 <template>
     <Hydrate ssr-only class="ww-image">
+        <!-- Text overlay props with ww-text -> :textOverlay="wwObject.content.data.textOverlay" -->
         <wwObjectImage class="ww-image" :ww-object-ctrl="wwObjectCtrl" :ww-attrs="wwAttrs"></wwObjectImage>
     </Hydrate>
 </template>
@@ -124,6 +125,20 @@ export default {
                 shortcut: 's',
                 next: 'WWIMAGE_STYLE'
             };
+            editOptionsList.WWIMAGE_OVERLAY_COLOR = {
+                title: {
+                    en: 'Set color overlay',
+                    fr: 'Définir un overlay'
+                },
+                desc: {
+                    en: 'Color overlay on hover',
+                    fr: 'Overlay au hover'
+                },
+                icon: 'fas fa-paint-brush',
+                shortcut: 'r',
+                next: 'WWIMAGE_OVERLAY_COLOR'
+            };
+
             editOptionsList.EDIT_IMAGE_RATIO = {
                 title: {
                     en: 'Change image ratio',
@@ -200,6 +215,40 @@ export default {
                             fr: 'Suivant'
                         },
                         next: 'WWIMAGE_STYLE'
+                    }
+                }
+            });
+            // wwLib.wwPopups.addStory('WWIMAGE_OVERLAY_TEXT', {
+            //     title: {
+            //         en: 'Edit color on hover',
+            //         fr: 'Éditer la couleur au hover'
+            //     },
+            //     type: 'wwPopupWwObjectColor',
+            //     buttons: {
+            //         NEXT: {
+            //             text: {
+            //                 en: 'Next',
+            //                 fr: 'Suivant'
+            //             },
+            //             next: 'WWIMAGE_COLOR'
+            //         }
+            //     }
+            // });
+            wwLib.wwPopups.addStory('WWIMAGE_OVERLAY_COLOR', {
+                title: {
+                    en: 'Edit color on hover',
+                    fr: 'Éditer la couleur au hover'
+                },
+                type: 'wwPopupColorPicker',
+                key: 'colorOverlay',
+                valueData: 'colorOverlay',
+                buttons: {
+                    OK: {
+                        text: {
+                            en: 'Ok',
+                            fr: 'Valider'
+                        },
+                        next: false
                     }
                 }
             });
@@ -318,6 +367,7 @@ export default {
 
             try {
                 const result = await wwLib.wwPopups.open(options);
+                console.log(result);
 
                 /*=============================================m_ÔÔ_m=============================================\
                   IMAGE
@@ -330,6 +380,9 @@ export default {
                 }
                 if (typeof result.focusPoint != 'undefined') {
                     this.wwObject.content.data.focusPoint = result.focusPoint;
+                }
+                if (typeof result.color != 'undefined') {
+                    this.wwObject.content.data.colorOverlay = result.color;
                 }
 
                 /*=============================================m_ÔÔ_m=============================================\

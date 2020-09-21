@@ -1,5 +1,8 @@
 <template>
-    <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper">
+    <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper" @mouseenter="overlayOn" @mouseleave="overlayOff">
+        <div class="color-overlay" :class="{ active: overlayVisible }" :style="c_colorOverlay"></div>
+        <!-- check and remove -->
+        <wwObject v-if="c_textOverlay" class="text-overlay" :class="{ active: overlayVisible }" v-bind:ww-object="c_textOverlay"></wwObject>
         <!-- wwManager:start -->
         <div class="controls-desktop" :class="{ lock: d_lockControls }">
             <div class="zoom-bar">
@@ -103,13 +106,33 @@ export default {
             d_zoomBarElement: null,
             d_lockControls: false,
             d_moveDirection: null,
-            d_imgSize: {}
+            d_imgSize: {},
             /* wwManager:end */
+            overlayVisible: false
         };
     },
     computed: {
         wwObject() {
             return this.wwObjectCtrl.get();
+        },
+        c_colorOverlay() {
+            if (!this.d_el) {
+                return {};
+            }
+
+            const styles = {
+                backgroundColor: this.wwObject.content.data.colorOverlay,
+                // to remove
+                opacity: 0.8
+            };
+
+            return styles;
+        },
+        c_textOverlay() {
+            if (this.wwObject.content.data.textOverlay) {
+                console.log(this.wwObject.content.data.textOverlay);
+                return this.wwObject.content.data.textOverlay;
+            }
         },
         c_styles() {
             if (!this.d_el) {
@@ -301,6 +324,25 @@ export default {
     },
     methods: {
         init() {
+            this.wwObject.content.data = this.wwObject.content.data || {};
+
+            if (!this.wwObject.content.data.textOverlay) {
+                this.wwObject.content.data.textOverlay = wwLib.wwObject.getDefault({
+                    type: 'ww-text',
+                    data: {
+                        text: {
+                            fr: 'Mon texte overlay !',
+                            en: 'My overlay text!'
+                        }
+                    }
+                });
+            }
+            if (!this.wwObject.content.data.colorOverlay) {
+                this.wwObject.content.data.colorOverlay = '#1976D2';
+            }
+
+            console.log(this.wwObject.content.data.colorOverlay, this.wwObject.content.data.textOverlay);
+
             this.d_zoomFactor = Math.sqrt((100 * 100) / (10 - this.d_zoomMin));
 
             // const section = this.$el.closest('.ww-section');
@@ -315,6 +357,14 @@ export default {
             }
 
             return false;
+        },
+
+        // OVERLAY
+        overlayOn() {
+            this.overlayVisible = true;
+        },
+        overlayOff() {
+            this.overlayVisible = false;
         },
 
         /*=============================================m_ÔÔ_m=============================================\
@@ -650,6 +700,29 @@ export default {
     display: flex;
     justify-content: center;
 
+    .color-overlay {
+        display: none;
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+    .color-overlay.active {
+        display: block;
+    }
+
+    .text-overlay {
+        display: none;
+        z-index: 1;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+    }
+    .text-overlay.active {
+        display: block;
+    }
+
     .border {
         position: absolute;
         top: -1px;
@@ -787,6 +860,7 @@ export default {
 .controls-desktop.lock {
     opacity: 1;
 }
+
 /* wwManager:end */
 </style>
 
