@@ -150,6 +150,19 @@ export default {
                 shortcut: 'm',
                 next: 'WWIMAGE_MINWIDTH'
             };
+            editOptionsList.WWIMAGE_HOVER_EFFECT = {
+                title: {
+                    en: 'Set hover effect',
+                    fr: "Configurer l'effet au hover"
+                },
+                desc: {
+                    en: 'Set color and text overlay on hover',
+                    fr: "Configurer l'effet au hover"
+                },
+                icon: 'wwi wwi-config',
+                shortcut: 'h',
+                next: 'WWIMAGE_HOVER_EFFECT'
+            };
             editOptionsList.EDIT_IMAGE_LINK = {
                 separator: {
                     en: 'Link',
@@ -291,6 +304,53 @@ export default {
                     }
                 }
             });
+            wwLib.wwPopups.addStory('WWIMAGE_HOVER_EFFECT', {
+                title: {
+                    en: 'Hover effect',
+                    fr: 'Effet au hover'
+                },
+                type: 'wwPopupForm',
+                storyData: {
+                    fields: [
+                        {
+                            label: {
+                                en: 'Color overlay:',
+                                fr: 'Overlay de couleur :'
+                            },
+                            type: 'radio',
+                            key: 'activeColorOverlay',
+                            valueData: 'wwObject.content.data.activeColorOverlay'
+                        },
+                        {
+                            label: {
+                                en: 'Overlay color:',
+                                fr: "Couleur de l'overlay :"
+                            },
+                            type: 'color',
+                            key: 'colorOverlay',
+                            valueData: 'wwObject.content.data.colorOverlay'
+                        },
+                        {
+                            label: {
+                                en: 'Hover text:',
+                                fr: 'Texte au hover :'
+                            },
+                            type: 'radio',
+                            key: 'activeTextOverlay',
+                            valueData: 'wwObject.content.data.activeTextOverlay'
+                        }
+                    ]
+                },
+                buttons: {
+                    OK: {
+                        text: {
+                            en: 'Ok',
+                            fr: 'Valider'
+                        },
+                        next: false
+                    }
+                }
+            });
             wwLib.wwPopups.addStory('WWIMAGE_FOCUSPOINT', {
                 title: {
                     en: 'Background focus point',
@@ -319,6 +379,13 @@ export default {
             try {
                 const result = await wwLib.wwPopups.open(options);
 
+                if (typeof result.activeColorOverlay != 'undefined') {
+                    this.wwObject.content.data.activeColorOverlay = result.activeColorOverlay;
+                }
+                if (typeof result.activeTextOverlay != 'undefined') {
+                    this.wwObject.content.data.activeTextOverlay = result.activeTextOverlay;
+                }
+
                 /*=============================================m_ÔÔ_m=============================================\
                   IMAGE
                 \================================================================================================*/
@@ -330,6 +397,9 @@ export default {
                 }
                 if (typeof result.focusPoint != 'undefined') {
                     this.wwObject.content.data.focusPoint = result.focusPoint;
+                }
+                if (typeof result.colorOverlay != 'undefined') {
+                    this.wwObject.content.data.colorOverlay = result.colorOverlay;
                 }
 
                 /*=============================================m_ÔÔ_m=============================================\

@@ -1,5 +1,8 @@
 <template>
-    <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper">
+    <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper" @mouseenter="overlayOn" @mouseleave="overlayOff">
+        <div v-if="isColorOverlay" ref="colorOverlay" class="color-overlay" :class="{ active: overlayVisible || c_editing }" :style="c_colorOverlay"></div>
+        <wwObject v-if="c_textOverlay && isTextOverlay" ref="textOverlay" class="text-overlay" :class="{ active: overlayVisible || c_editing }" v-bind:ww-object="c_textOverlay"></wwObject>
+
         <!-- wwManager:start -->
         <div class="controls-desktop" :class="{ lock: d_lockControls }">
             <div class="zoom-bar">
@@ -103,13 +106,36 @@ export default {
             d_zoomBarElement: null,
             d_lockControls: false,
             d_moveDirection: null,
-            d_imgSize: {}
+            d_imgSize: {},
             /* wwManager:end */
+            overlayVisible: false
         };
     },
     computed: {
         wwObject() {
             return this.wwObjectCtrl.get();
+        },
+        isColorOverlay() {
+            return this.wwObject.content.data.activeColorOverlay;
+        },
+        isTextOverlay() {
+            return this.wwObject.content.data.activeTextOverlay;
+        },
+        c_colorOverlay() {
+            if (!this.d_el) {
+                return {};
+            }
+
+            const styles = {
+                backgroundColor: this.wwObject.content.data.colorOverlay
+            };
+
+            return styles;
+        },
+        c_textOverlay() {
+            if (this.wwObject.content.data.textOverlay) {
+                return this.wwObject.content.data.textOverlay;
+            }
         },
         c_styles() {
             if (!this.d_el) {
@@ -301,6 +327,33 @@ export default {
     },
     methods: {
         init() {
+            this.wwObject.content.data = this.wwObject.content.data || {};
+
+            if (!this.wwObject.content.data.activeColorOverlay) {
+                this.wwObject.content.data.activeColorOverlay = false;
+            }
+            if (!this.wwObject.content.data.activeTextOverlay) {
+                this.wwObject.content.data.activeTextOverlay = false;
+            }
+
+            if (!this.wwObject.content.data.textOverlay) {
+                this.wwObject.content.data.textOverlay = wwLib.wwObject.getDefault({
+                    type: 'ww-text',
+                    data: {
+                        text: {
+                            fr: 'Mon texte overlay !',
+                            en: 'My overlay text!'
+                        }
+                    }
+                });
+            }
+            if (!this.wwObject.content.data.textOverlayPosition) {
+                this.wwObject.content.data.textOverlayPosition = 'center';
+            }
+            if (!this.wwObject.content.data.colorOverlay) {
+                this.wwObject.content.data.colorOverlay = '#1976D2';
+            }
+
             this.d_zoomFactor = Math.sqrt((100 * 100) / (10 - this.d_zoomMin));
 
             // const section = this.$el.closest('.ww-section');
@@ -315,6 +368,14 @@ export default {
             }
 
             return false;
+        },
+
+        // OVERLAY
+        overlayOn() {
+            this.overlayVisible = true;
+        },
+        overlayOff() {
+            this.overlayVisible = false;
         },
 
         /*=============================================m_ÔÔ_m=============================================\
@@ -645,10 +706,39 @@ export default {
 
 <style scoped lang="scss">
 .ww-image {
+    overflow: hidden;
     position: relative;
     user-select: none;
     display: flex;
     justify-content: center;
+
+    .color-overlay {
+        opacity: 0;
+        z-index: 1;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transition: opacity 0.3s;
+    }
+    .color-overlay.active {
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
+
+    .text-overlay {
+        opacity: 0;
+        z-index: 1;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(50%);
+        transition: 0.4s;
+    }
+    .text-overlay.active {
+        transform: translateX(-50%) translateY(-50%);
+        opacity: 1;
+        transition: 0.3s;
+    }
 
     .border {
         position: absolute;
@@ -787,6 +877,7 @@ export default {
 .controls-desktop.lock {
     opacity: 1;
 }
+
 /* wwManager:end */
 </style>
 
