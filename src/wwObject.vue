@@ -379,8 +379,6 @@ export default {
             try {
                 const result = await wwLib.wwPopups.open(options);
 
-                console.log(result);
-
                 if (typeof result.activeColorOverlay != 'undefined') {
                     this.wwObject.content.data.activeColorOverlay = result.activeColorOverlay;
                 }
