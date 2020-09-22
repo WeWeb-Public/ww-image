@@ -1,7 +1,7 @@
 <template>
     <div class="ww-image" :class="{ bg: wwAttrs.wwCategory == 'background' }" :style="c_styles.wrapper" @mouseenter="overlayOn" @mouseleave="overlayOff">
-        <div v-if="isColorOverlay" ref="colorOverlay" class="color-overlay" :class="{ active: overlayVisible }" :style="c_colorOverlay"></div>
-        <wwObject v-if="c_textOverlay && isTextOverlay" ref="textOverlay" class="text-overlay" :class="{ active: overlayVisible }" v-bind:ww-object="c_textOverlay"></wwObject>
+        <div v-if="isColorOverlay" ref="colorOverlay" class="color-overlay" :class="{ active: overlayVisible || c_editing }" :style="c_colorOverlay"></div>
+        <wwObject v-if="c_textOverlay && isTextOverlay" ref="textOverlay" class="text-overlay" :class="{ active: overlayVisible || c_editing }" v-bind:ww-object="c_textOverlay"></wwObject>
 
         <!-- wwManager:start -->
         <div class="controls-desktop" :class="{ lock: d_lockControls }">
