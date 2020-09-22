@@ -1,6 +1,5 @@
 <template>
     <Hydrate ssr-only class="ww-image">
-        <!-- Text overlay props with ww-text -> :textOverlay="wwObject.content.data.textOverlay" -->
         <wwObjectImage class="ww-image" :ww-object-ctrl="wwObjectCtrl" :ww-attrs="wwAttrs"></wwObjectImage>
     </Hydrate>
 </template>
@@ -125,20 +124,19 @@ export default {
                 shortcut: 's',
                 next: 'WWIMAGE_STYLE'
             };
-            editOptionsList.WWIMAGE_OVERLAY_COLOR = {
+            editOptionsList.WWIMAGE_HOVER_EFFECT = {
                 title: {
-                    en: 'Set color overlay',
-                    fr: 'Définir un overlay'
+                    en: 'Set hover effect',
+                    fr: "Configurer l'effet au hover"
                 },
                 desc: {
-                    en: 'Color overlay on hover',
-                    fr: 'Overlay au hover'
+                    en: 'Set color and text overlay on hover',
+                    fr: "Configurer l'effet au hover"
                 },
-                icon: 'fas fa-paint-brush',
-                shortcut: 'r',
-                next: 'WWIMAGE_OVERLAY_COLOR'
+                icon: 'wwi wwi-config',
+                shortcut: 'h',
+                next: 'WWIMAGE_HOVER_EFFECT'
             };
-
             editOptionsList.EDIT_IMAGE_RATIO = {
                 title: {
                     en: 'Change image ratio',
@@ -218,40 +216,6 @@ export default {
                     }
                 }
             });
-            // wwLib.wwPopups.addStory('WWIMAGE_OVERLAY_TEXT', {
-            //     title: {
-            //         en: 'Edit color on hover',
-            //         fr: 'Éditer la couleur au hover'
-            //     },
-            //     type: 'wwPopupWwObjectColor',
-            //     buttons: {
-            //         NEXT: {
-            //             text: {
-            //                 en: 'Next',
-            //                 fr: 'Suivant'
-            //             },
-            //             next: 'WWIMAGE_COLOR'
-            //         }
-            //     }
-            // });
-            wwLib.wwPopups.addStory('WWIMAGE_OVERLAY_COLOR', {
-                title: {
-                    en: 'Edit color on hover',
-                    fr: 'Éditer la couleur au hover'
-                },
-                type: 'wwPopupColorPicker',
-                key: 'colorOverlay',
-                valueData: 'colorOverlay',
-                buttons: {
-                    OK: {
-                        text: {
-                            en: 'Ok',
-                            fr: 'Valider'
-                        },
-                        next: false
-                    }
-                }
-            });
             wwLib.wwPopups.addStory('WWIMAGE_STYLE', {
                 title: {
                     en: 'Image style',
@@ -276,6 +240,62 @@ export default {
                 type: 'wwPopupLinks',
                 storyData: {
                     links: ['EXTERNAL', 'INTERNAL', 'SECTION', 'POPUP', 'DOWNLOAD', 'ZOOM', 'TOGGLE_NAVBAR', 'NO_LINK']
+                }
+            });
+            wwLib.wwPopups.addStory('WWIMAGE_HOVER_EFFECT', {
+                title: {
+                    en: 'Hover effect',
+                    fr: 'Effet au hover'
+                },
+                type: 'wwPopupForm',
+                storyData: {
+                    fields: [
+                        {
+                            label: {
+                                en: 'Color overlay:',
+                                fr: 'Overlay de couleur :'
+                            },
+                            type: 'radio',
+                            key: 'activeColorOverlay',
+                            valueData: 'wwObject.content.data.activeColorOverlay'
+                        },
+                        {
+                            label: {
+                                en: 'Particle color:',
+                                fr: 'Couleur des particules :'
+                            },
+                            type: 'color',
+                            key: 'colorOverlay',
+                            valueData: 'colorOverlay'
+                        },
+                        {
+                            label: {
+                                en: 'Hover text:',
+                                fr: 'Texte au hover :'
+                            },
+                            type: 'radio',
+                            key: 'activeTextOverlay',
+                            valueData: 'wwObject.content.data.activeTextOverlay'
+                        },
+                        {
+                            label: {
+                                en: 'Text to display:',
+                                fr: 'Texte à afficher :'
+                            },
+                            type: 'text',
+                            key: 'textOverlay',
+                            valueData: 'textOverlay'
+                        }
+                    ]
+                },
+                buttons: {
+                    OK: {
+                        text: {
+                            en: 'Ok',
+                            fr: 'Valider'
+                        },
+                        next: false
+                    }
                 }
             });
             wwLib.wwPopups.addStory('WWIMAGE_ALT', {
@@ -367,7 +387,13 @@ export default {
 
             try {
                 const result = await wwLib.wwPopups.open(options);
-                console.log(result);
+
+                if (typeof result.activeColorOverlay != 'undefined') {
+                    this.wwObject.content.data.activeColorOverlay = result.activeColorOverlay;
+                }
+                if (typeof result.activeTextOverlay != 'undefined') {
+                    this.wwObject.content.data.activeTextOverlay = result.activeTextOverlay;
+                }
 
                 /*=============================================m_ÔÔ_m=============================================\
                   IMAGE
