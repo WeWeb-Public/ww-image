@@ -234,7 +234,7 @@ export default {
                 const sources = [];
 
                 for (const screen in screenBreakpoints) {
-                    if (this.d_imageSizes[screen]) {
+                    if (this.d_imageSizes[screen] && this.d_imageSizes[screen][0]) {
                         sources.push(
                             `https://weweb.twic.pics/${this.wwObject.content.data.url}${this.wwObject.content.data.url.indexOf('?') !== -1 ? '&' : '?'}twic=v1/quality=85/resize=${this.d_imageSizes[screen][0]} ${screenBreakpoints[screen]}w`
                         );

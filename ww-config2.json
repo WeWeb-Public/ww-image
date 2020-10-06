@@ -1,0 +1,115 @@
+{
+    "componentPath": "./src/wwObject.vue",
+    "content": {
+        "type": "ww-image",
+        "data": {
+            "url": "https://cdn.weweb.app/public/images/no_image_selected.png",
+            "twicUrl": "https://cdn.weweb.app/public/images/no_image_selected.png",
+            "alt": "",
+            "position": {
+                "x": 0,
+                "y": 0
+            },
+            "pos": {},
+            "zoom": 1,
+            "style": {
+                "borderRadius": 0,
+                "borderWidth": 0,
+                "borderColor": null,
+                "borderStyle": null,
+                "overlay": null,
+                "filter": null,
+                "boxShadow": {
+                    "x": 0,
+                    "y": 0,
+                    "b": 0,
+                    "s": 0,
+                    "c": ""
+                }
+            },
+            "animation": {
+                "duration": 0,
+                "delay": 0,
+                "fn": null,
+                "opacity": 1,
+                "scale": 1,
+                "translateX": 0,
+                "translateY": 0,
+                "rotate": 0
+            },
+            "imgSize": {
+                "w": 1920,
+                "h": 1080
+            },
+            "hover": {
+                "name": "",
+                "options": {}
+            },
+            "focusPoint": [50, 50]
+        }
+    },
+    "upsales": {
+        "wwAnalytics": {
+            "click": true
+        }
+    },
+    "cmsOptions": {
+        "wwObjectMenu": {
+            "items": [
+                {
+                    "name": "OPTIONS",
+                    "main": true,
+                    "text": {
+                        "en": "Options",
+                        "fr": "Options"
+                    },
+                    "icon": "wwi wwi-edit-other",
+                    "action": "edit"
+                },
+                {
+                    "name": "SOURCE",
+                    "text": {
+                        "en": "Image",
+                        "fr": "Image"
+                    },
+                    "icon": "wwi wwi-image",
+                    "action": "changeImage"
+                },
+                {
+                    "name": "CONNECT",
+                    "text": {
+                        "en": "Connect to CMS",
+                        "fr": "Connecter à un CMS"
+                    },
+                    "icon": "",
+                    "action": "connectCms"
+                }
+            ]
+        },
+        "bindableProps": [
+            {
+                "displayName": {
+                    "en": "Alt text",
+                    "fr": "Texte alt"
+                },
+                "localizable": true,
+                "attributeName": "alt"
+            },
+            {
+                "displayName": {
+                    "en": "Image url",
+                    "fr": "Url de l'image"
+                },
+                "attributeName": "url"
+            },
+            {
+                "displayName": {
+                    "en": "Image caption",
+                    "fr": "Légende de l'image"
+                },
+                "localizable": true,
+                "attributeName": "caption"
+            }
+        ]
+    }
+}
